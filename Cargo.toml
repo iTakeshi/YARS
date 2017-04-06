@@ -1,0 +1,8 @@
+[package]
+name = "glium_ex"
+version = "0.1.0"
+authors = ["iTakeshi <takeshi.ito.doraemon@gmail.com>"]
+
+[dependencies]
+glium = "*"
+nalgebra = "*"
