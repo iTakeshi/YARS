@@ -4,5 +4,9 @@ version = "0.1.0"
 authors = ["iTakeshi <takeshi.ito.doraemon@gmail.com>"]
 
 [dependencies]
-glium = "*"
+glium = "0.16.0"
 nalgebra = "*"
+
+[dependencies.obj-rs]
+path = "../obj-rs"
+features = ["glium-support"]
