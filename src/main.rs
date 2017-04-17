@@ -6,6 +6,7 @@ extern crate nalgebra as na;
 
 extern crate obj;
 
+mod kinematics;
 mod matrix;
 mod program;
 
@@ -26,22 +27,29 @@ fn main() {
         .. Default::default()
     };
 
+    let length = [10.0, 10.0f32];
+    let mut angle = [0.0, 0.0f32];
+
     let mut translation = [
-        [5.0, 20.0, -5.0f32],
-        [5.0, 10.0, -5.0f32],
+        [0.0, 0.0, 0.0f32],
+        [10.0, 0.0, 0.0f32],
     ];
     let mut rotation = [
-        [3.1415 / 2.0, 0.0, 0.0f32],
-        [3.1415 / 2.0, 0.0, 0.0f32],
+        [0.0, 0.0, 0.0f32],
+        [0.0, 0.0, 0.0f32],
     ];
 
     'mainloop: loop {
         for ev in display.poll_events() {
-            use glium::glutin::{ElementState, Event, VirtualKeyCode};
+            use glium::glutin::{Event, VirtualKeyCode as VKC};
+            use glium::glutin::ElementState::Pressed;
             match ev {
                 Event::Closed => return,
-                Event::KeyboardInput(
-                    ElementState::Pressed, _, Some(VirtualKeyCode::Q)) => return,
+                Event::KeyboardInput(Pressed, _, Some(VKC::Q)) => return,
+                Event::KeyboardInput(Pressed, _, Some(VKC::U)) => angle[0] += 0.1,
+                Event::KeyboardInput(Pressed, _, Some(VKC::I)) => angle[0] -= 0.1,
+                Event::KeyboardInput(Pressed, _, Some(VKC::J)) => angle[1] += 0.1,
+                Event::KeyboardInput(Pressed, _, Some(VKC::K)) => angle[1] -= 0.1,
                 _ => (),
             }
         }
@@ -65,7 +73,17 @@ fn main() {
                 ).unwrap();
         }
 
-        for n in 0..2 {
+        for n in 0..translation.len() {
+            let angle_offset = if n == 0 { 0.0f32 } else { rotation[n - 1][1] };
+            match kinematics::forward(
+                    &translation[n], &angle_offset, &length[n], &angle[n]) {
+                (t, r) => {
+                    if n < translation.len() - 1 {
+                        translation[n + 1] = t;
+                    }
+                    rotation[n][1] = r;
+                }
+            };
             let model_matrix = matrix::model_matrix(&translation[n], &rotation[n]);
             target.draw(
                 &model_vertices,
