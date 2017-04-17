@@ -35,15 +35,30 @@ pub fn axis_program(display: &GlutinFacade) -> glium::Program {
         display, &axis_vert_shader_src, &axis_frag_shader_src, None).unwrap()
 }
 
-pub fn axis_vertices(display: &GlutinFacade) -> glium::VertexBuffer<Vertex> {
-    glium::VertexBuffer::new(display, &[
-        Vertex { position: [-1000.0,     0.0,     0.0], normal: [0.0, 0.0, 0.0] },
-        Vertex { position: [ 1000.0,     0.0,     0.0], normal: [0.0, 0.0, 0.0] },
-        Vertex { position: [    0.0, -1000.0,     0.0], normal: [0.0, 0.0, 0.0] },
-        Vertex { position: [    0.0,  1000.0,     0.0], normal: [0.0, 0.0, 0.0] },
-        Vertex { position: [    0.0,     0.0, -1000.0], normal: [0.0, 0.0, 0.0] },
-        Vertex { position: [    0.0,     0.0,  1000.0], normal: [0.0, 0.0, 0.0] },
-    ]).unwrap()
+pub fn axes(display: &GlutinFacade) -> [(glium::VertexBuffer<Vertex>, [f32; 3]); 3] {
+    [
+        (
+            glium::VertexBuffer::new(display, &[
+                Vertex { position: [-1000.0,     0.0,     0.0], normal: [0.0, 0.0, 0.0] },
+                Vertex { position: [ 1000.0,     0.0,     0.0], normal: [0.0, 0.0, 0.0] },
+            ]).unwrap(),
+            [1.0, 0.0, 0.0],
+            ),
+        (
+            glium::VertexBuffer::new(display, &[
+                Vertex { position: [    0.0, -1000.0,     0.0], normal: [0.0, 0.0, 0.0] },
+                Vertex { position: [    0.0,  1000.0,     0.0], normal: [0.0, 0.0, 0.0] },
+            ]).unwrap(),
+            [0.0, 1.0, 0.0],
+            ),
+        (
+            glium::VertexBuffer::new(display, &[
+                Vertex { position: [    0.0,     0.0, -1000.0], normal: [0.0, 0.0, 0.0] },
+                Vertex { position: [    0.0,     0.0,  1000.0], normal: [0.0, 0.0, 0.0] },
+            ]).unwrap(),
+            [0.0, 0.0, 1.0],
+            ),
+        ]
 }
 
 pub fn model_program(display: &GlutinFacade) -> glium::Program {

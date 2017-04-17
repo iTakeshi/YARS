@@ -13,9 +13,9 @@ pub fn view_perspective_matrix(window_size: (u32, u32)) -> [[f32; 4]; 4] {
     let z_far = 1000.0f32;
     let z_near = 0.1f32;
 
-    let camera_position = [2.0, 5.0, 30.0f32];
-    let camera_target   = [0.0, 0.0,  0.0f32];
-    let camera_up       = [0.0, 1.0,  0.0f32];
+    let camera_position = [15.0, 8.0, 21.0f32];
+    let camera_target   = [5.0, 12.0, -5.0f32];
+    let camera_up       = [0.0, 1.0, 0.0f32];
 
     let view_perspective = {
         let perspective = {
@@ -40,7 +40,7 @@ pub fn model_matrix(translation: &[f32; 3], rotation: &[f32; 3]) -> [[f32; 4]; 4
         let translation = Translation3::new(
             translation[0], translation[1], translation[2]).to_homogeneous();
         let rotation = Rotation3::from_euler_angles(
-            rotation[2], rotation[0], rotation[1]).to_homogeneous(); // roll-pitch-yaw
+            rotation[0], rotation[1], rotation[2]).to_homogeneous();
         let scale = Matrix4::new_scaling(1.0f32);
         translation * rotation * scale
     };

@@ -15,7 +15,7 @@ fn main() {
     let display = glium::glutin::WindowBuilder::new()
         .with_depth_buffer(24).build_glium().unwrap();
     let axis_program = program::axis_program(&display);
-    let axis_vertices = program::axis_vertices(&display);
+    let axes = program::axes(&display);
     let model_program = program::model_program(&display);
     let (model_vertices, model_indices) = program::model_buffers(&display);
     let params = glium::DrawParameters {
@@ -28,8 +28,14 @@ fn main() {
         .. Default::default()
     };
 
-    let mut translation = [0.0, 0.0, 0.0f32];
-    let mut rotation = [0.0, 0.0, 0.0f32];
+    let mut translation = [
+        [5.0, 20.0, -5.0f32],
+        [5.0, 10.0, -5.0f32],
+    ];
+    let mut rotation = [
+        [3.1415 / 2.0, 0.0, 0.0f32],
+        [3.1415 / 2.0, 0.0, 0.0f32],
+    ];
 
     'mainloop: loop {
         for ev in display.poll_events() {
@@ -47,30 +53,34 @@ fn main() {
 
         let view_perspective_matrix =
             matrix::view_perspective_matrix(target.get_dimensions());
-        let model_matrix = matrix::model_matrix(&translation, &rotation);
 
-        target.draw(
-            &axis_vertices,
-            &glium::index::NoIndices(glium::index::PrimitiveType::LinesList),
-            &axis_program,
-            &uniform! {
-                rgb: [1.0, 0.0, 0.0f32],
-                view_perspective: view_perspective_matrix,
-            },
-            &params,
-            ).unwrap();
+        for axis in axes.iter() {
+            target.draw(
+                &axis.0,
+                &glium::index::NoIndices(glium::index::PrimitiveType::LinesList),
+                &axis_program,
+                &uniform! {
+                    rgb: axis.1,
+                    view_perspective: view_perspective_matrix,
+                },
+                &params,
+                ).unwrap();
+        }
 
-        target.draw(
-            &model_vertices,
-            &model_indices,
-            &model_program,
-            &uniform! {
-                light: [-1.0, 0.4, 0.9f32],
-                view_perspective: view_perspective_matrix,
-                model: model_matrix,
-            },
-            &params
-            ).unwrap();
+        for n in 0..2 {
+            let model_matrix = matrix::model_matrix(&translation[n], &rotation[n]);
+            target.draw(
+                &model_vertices,
+                &model_indices,
+                &model_program,
+                &uniform! {
+                    light: [-1.0, 5.0, 5.0f32],
+                    view_perspective: view_perspective_matrix,
+                    model: model_matrix,
+                },
+                &params
+                ).unwrap();
+        }
 
         target.finish().unwrap();
     }
