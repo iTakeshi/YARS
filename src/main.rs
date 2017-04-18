@@ -1,5 +1,3 @@
-#![feature(const_fn)]
-
 #[macro_use]
 extern crate glium;
 use glium::{DisplayBuild, Surface};
