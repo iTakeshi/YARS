@@ -40,7 +40,7 @@ pub fn model_matrix(translation: &[f32; 3], rotation: &[f32; 3]) -> [[f32; 4]; 4
         let translation = Translation3::new(
             translation[0], translation[1], translation[2]).to_homogeneous();
         let rotation = Rotation3::from_euler_angles(
-            rotation[2], rotation[0], rotation[1]).to_homogeneous();
+            rotation[0], rotation[1], rotation[2]).to_homogeneous();
         let scale = Matrix4::new_scaling(1.0f32);
         translation * rotation * scale
     };

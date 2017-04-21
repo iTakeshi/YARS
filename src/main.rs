@@ -30,11 +30,13 @@ fn main() {
     let length = [10.0, 10.0f32];
     let mut angle = [0.0, 0.0f32];
 
-    let mut translation = [
+    let mut position_tip = [
         [0.0, 0.0, 0.0f32],
         [10.0, 0.0, 0.0f32],
+        [20.0, 0.0, 0.0f32],
     ];
     let mut rotation = [
+        [0.0, 0.0, 0.0f32],
         [0.0, 0.0, 0.0f32],
         [0.0, 0.0, 0.0f32],
     ];
@@ -73,18 +75,19 @@ fn main() {
                 ).unwrap();
         }
 
-        for n in 0..translation.len() {
-            let angle_offset = if n == 0 { 0.0f32 } else { rotation[n - 1][1] };
+        for n in 1..position_tip.len() {
             match kinematics::forward(
-                    &translation[n], &angle_offset, &length[n], &angle[n]) {
+                    &position_tip[n - 1],
+                    &rotation[n - 1][2],
+                    &length[n - 1],
+                    &angle[n - 1],
+                    ) {
                 (t, r) => {
-                    if n < translation.len() - 1 {
-                        translation[n + 1] = t;
-                    }
-                    rotation[n][1] = r;
+                    position_tip[n] = t;
+                    rotation[n][2] = r;
                 }
             };
-            let model_matrix = matrix::model_matrix(&translation[n], &rotation[n]);
+            let model_matrix = matrix::model_matrix(&position_tip[n - 1], &rotation[n]);
             target.draw(
                 &model_vertices,
                 &model_indices,
