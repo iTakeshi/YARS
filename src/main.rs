@@ -3,9 +3,11 @@ extern crate glium;
 use glium::{DisplayBuild, Surface};
 
 extern crate nalgebra as na;
+use na::Vector2;
 
 extern crate obj;
 
+mod dynamics;
 mod kinematics;
 mod matrix;
 mod program;
@@ -27,8 +29,10 @@ fn main() {
         .. Default::default()
     };
 
-    let length = [10.0, 10.0f32];
-    let mut angle = [0.0, 0.0f32];
+    let mut torque = Vector2::new(0.0, 0.0f32);
+    let mut angular_velocity = Vector2::new(0.0, 0.0f32);
+    let mut angle = Vector2::new(0.0, 0.0f32);
+    let length = Vector2::new(0.1, 0.1f32);
 
     let mut position_tip = [
         [0.0, 0.0, 0.0f32],
@@ -44,14 +48,18 @@ fn main() {
     'mainloop: loop {
         for ev in display.poll_events() {
             use glium::glutin::{Event, VirtualKeyCode as VKC};
-            use glium::glutin::ElementState::Pressed;
+            use glium::glutin::ElementState::{Pressed, Released};
             match ev {
                 Event::Closed => return,
                 Event::KeyboardInput(Pressed, _, Some(VKC::Q)) => return,
-                Event::KeyboardInput(Pressed, _, Some(VKC::U)) => angle[0] += 0.1,
-                Event::KeyboardInput(Pressed, _, Some(VKC::I)) => angle[0] -= 0.1,
-                Event::KeyboardInput(Pressed, _, Some(VKC::J)) => angle[1] += 0.1,
-                Event::KeyboardInput(Pressed, _, Some(VKC::K)) => angle[1] -= 0.1,
+                Event::KeyboardInput(Pressed, _, Some(VKC::U)) => torque[0] =  1.5,
+                Event::KeyboardInput(Pressed, _, Some(VKC::I)) => torque[0] = -1.5,
+                Event::KeyboardInput(Pressed, _, Some(VKC::J)) => torque[1] =  1.5,
+                Event::KeyboardInput(Pressed, _, Some(VKC::K)) => torque[1] = -1.5,
+                Event::KeyboardInput(Released, _, Some(VKC::U)) => torque[0] = 0.0,
+                Event::KeyboardInput(Released, _, Some(VKC::I)) => torque[0] = 0.0,
+                Event::KeyboardInput(Released, _, Some(VKC::J)) => torque[1] = 0.0,
+                Event::KeyboardInput(Released, _, Some(VKC::K)) => torque[1] = 0.0,
                 _ => (),
             }
         }
@@ -75,11 +83,18 @@ fn main() {
                 ).unwrap();
         }
 
+        match dynamics::lagrange(&torque, angular_velocity, angle, &length) {
+            (v, a) => {
+                angular_velocity = v;
+                angle = a;
+            }
+        }
+
         for n in 1..position_tip.len() {
             match kinematics::forward(
                     &position_tip[n - 1],
                     &rotation[n - 1][2],
-                    &length[n - 1],
+                    &10.0f32,
                     &angle[n - 1],
                     ) {
                 (t, r) => {
