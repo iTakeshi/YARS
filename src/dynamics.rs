@@ -24,17 +24,20 @@ pub fn lagrange(
         mass[1] * length[0] * (length[1] / 2.0) * angular_velocity[0].powi(2) * angle[1].sin(),
         );
 
-    let g = Vector2::new(
-        (mass[0] * gravity * (length[0] / 2.0) + mass[1] * gravity * length[0]) * angle[0].cos()
-            + mass[1] * gravity * (length[1] / 2.0) * (angle[0] + angle[1]).cos(),
-        mass[1] * gravity * (length[1] / 2.0) * (angle[0] + angle[1]).cos(),
-        );
-
-    let a = m.try_inverse().unwrap() * (torque - h - g);
+    //let g = Vector2::new(
+    //    (mass[0] * gravity * (length[0] / 2.0) + mass[1] * gravity * length[0]) * angle[0].cos()
+    //        + mass[1] * gravity * (length[1] / 2.0) * (angle[0] + angle[1]).cos(),
+    //    mass[1] * gravity * (length[1] / 2.0) * (angle[0] + angle[1]).cos(),
+    //    );
+    let g = Vector2::new(0.0, 0.0);
 
     let frame = 0.006;
-    (
-        angular_velocity + (a - 2.0 * angular_velocity) * frame,
-        angle + angular_velocity * frame,
-        )
+    let acc = m.try_inverse().unwrap() * (torque - h - g); // - 2.0 * angular_velocity;
+    let vel = angular_velocity + acc * frame;
+    let ang = angle + vel * frame;
+
+    println!("{}, {}, {}, {}, {}, {}, {}, {}",
+             acc[0], acc[1], vel[0], vel[1], ang[0], ang[1], torque[0], torque[1]);
+
+    (vel, ang)
 }
