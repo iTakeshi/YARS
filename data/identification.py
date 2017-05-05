@@ -1,11 +1,13 @@
 import csv
 import math
+import sys
+
 import numpy as np
 
 m = None
 t = None
 
-with open("0.csv") as csvfile:
+with open(sys.argv[1]) as csvfile:
     reader = csv.reader(csvfile, delimiter=",")
     for row in reader:
         d = [float(x) for x in row]
@@ -15,18 +17,20 @@ with open("0.csv") as csvfile:
                 d[0],
                 d[1],
                 2 * d[0] * math.cos(d[5]) + d[1] * math.cos(d[5]) - 2 * d[2] * d[3] * math.sin(d[5]) - d[3] * d[3] * math.sin(d[5]),
+                math.cos(d[4]),
+                math.cos(d[4] + d[5]),
                 d[2],
                 0,
-                math.copysign(1, d[2]),
-                0],
+                ],
             [
                 0,
                 d[0] + d[1],
                 d[0] * math.cos(d[5]) + d[2] * d[2] * math.sin(d[5]),
                 0,
-                d[3],
+                math.cos(d[4] + d[5]),
                 0,
-                math.copysign(1, d[3])]
+                d[3],
+                ]
             ])
 
         ti = np.array([[d[6]], [d[7]]])

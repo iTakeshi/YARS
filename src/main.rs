@@ -13,6 +13,10 @@ mod matrix;
 mod program;
 
 fn main() {
+    use std::env;
+    let args: Vec<String> = env::args().collect();
+    let flag = (args.len() > 1);
+
     let display = glium::glutin::WindowBuilder::new()
         .with_depth_buffer(24).build_glium().unwrap();
     let axis_program = program::axis_program(&display);
@@ -45,6 +49,10 @@ fn main() {
         [0.0, 0.0, 0.0f32],
     ];
 
+    let mut t = 0.0f32;
+
+    let step = 0.001;
+
     'mainloop: loop {
         for ev in display.poll_events() {
             use glium::glutin::{Event, VirtualKeyCode as VKC};
@@ -52,17 +60,20 @@ fn main() {
             match ev {
                 Event::Closed => return,
                 Event::KeyboardInput(Pressed, _, Some(VKC::Q)) => return,
-                Event::KeyboardInput(Pressed, _, Some(VKC::U)) => torque[0] =  1.5,
-                Event::KeyboardInput(Pressed, _, Some(VKC::I)) => torque[0] = -1.5,
-                Event::KeyboardInput(Pressed, _, Some(VKC::J)) => torque[1] =  1.5,
-                Event::KeyboardInput(Pressed, _, Some(VKC::K)) => torque[1] = -1.5,
-                Event::KeyboardInput(Released, _, Some(VKC::U)) => torque[0] = 0.0,
-                Event::KeyboardInput(Released, _, Some(VKC::I)) => torque[0] = 0.0,
-                Event::KeyboardInput(Released, _, Some(VKC::J)) => torque[1] = 0.0,
-                Event::KeyboardInput(Released, _, Some(VKC::K)) => torque[1] = 0.0,
+                //Event::KeyboardInput(Pressed, _, Some(VKC::U)) => torque[0] =  1.5,
+                //Event::KeyboardInput(Pressed, _, Some(VKC::I)) => torque[0] = -1.5,
+                //Event::KeyboardInput(Pressed, _, Some(VKC::J)) => torque[1] =  1.5,
+                //Event::KeyboardInput(Pressed, _, Some(VKC::K)) => torque[1] = -1.5,
+                //Event::KeyboardInput(Released, _, Some(VKC::U)) => torque[0] = 0.0,
+                //Event::KeyboardInput(Released, _, Some(VKC::I)) => torque[0] = 0.0,
+                //Event::KeyboardInput(Released, _, Some(VKC::J)) => torque[1] = 0.0,
+                //Event::KeyboardInput(Released, _, Some(VKC::K)) => torque[1] = 0.0,
                 _ => (),
             }
         }
+
+        torque[0] = t.sin() / 2.0;
+        torque[1] = (t * -1.0).sin() / 10.0;
 
         let mut target = display.draw();
         target.clear_color_and_depth((0.3, 0.3, 1.0, 1.0), 1.0);
@@ -83,10 +94,19 @@ fn main() {
                 ).unwrap();
         }
 
-        match dynamics::lagrange(&torque, angular_velocity, angle, &length) {
-            (v, a) => {
-                angular_velocity = v;
-                angle = a;
+        if (flag) {
+            match dynamics::identified(&torque, angular_velocity, angle, &length, &step) {
+                (v, a) => {
+                    angular_velocity = v;
+                    angle = a;
+                }
+            }
+        } else {
+            match dynamics::lagrange(&torque, angular_velocity, angle, &length, &step) {
+                (v, a) => {
+                    angular_velocity = v;
+                    angle = a;
+                }
             }
         }
 
@@ -102,6 +122,8 @@ fn main() {
                     rotation[n][2] = r;
                 }
             };
+            print!("{}, {}", position_tip[n][0], position_tip[n][1]);
+            if (n < position_tip.len() - 1) { print!(", "); } else { println!("") }
             let model_matrix = matrix::model_matrix(&position_tip[n - 1], &rotation[n]);
             target.draw(
                 &model_vertices,
@@ -115,6 +137,7 @@ fn main() {
                 &params
                 ).unwrap();
         }
+        t += step;
 
         target.finish().unwrap();
     }
